@@ -1,194 +1,190 @@
-import {Painter} from "./painter";
-import {Page} from "../models/page";
-import {Point} from '../models/base-types';
-
-/**
- * Created by hezhaoyun on 2017/6/16.
- */
+import { Painter } from "./painter";
+import { Page } from "../models/page";
+import { Point } from '../models/base-types';
 
 export class PageController {
 
-  private startPoint: Point;
+    private startPoint: Point;
 
-  constructor(private page: Page, public painter: Painter) {
-  }
-
-  isSelectionMode() {
-    return this.page.isSelectionMode();
-  }
-
-  enterSelectionMode() {
-
-    this.page.enterSelectionMode();
-    this.draw();
-  }
-
-  leaveSelectionMode() {
-
-    this.page.leaveSelectionMode();
-    this.clearSelection();
-
-    this.draw();
-  }
-
-  draw() {
-    this.painter.draw(this.page);
-  }
-
-  onTouchStart(point: Point): boolean {
-
-    if (!this.isSelectionMode()) {
-      return false;
+    constructor(private page: Page, public painter: Painter) {
     }
 
-    if (this.page.isSomethingSelected()) {
-      this.clearSelection(true);
-      return true;
+    isSelectionMode() {
+        return this.page.isSelectionMode();
     }
 
-    this.startPoint = point;
+    enterSelectionMode() {
 
-    return true;
-  }
-
-  onTouchMove(point: Point): boolean {
-
-    if (!this.isSelectionMode()) {
-      return false;
+        this.page.enterSelectionMode();
+        this.draw();
     }
 
-    if (this.page.isSomethingSelected()) {
-      return true;
+    leaveSelectionMode() {
+
+        this.page.leaveSelectionMode();
+        this.clearSelection();
+
+        this.draw();
     }
 
-    this.selectRange(this.startPoint, point);
-
-    return true;
-  }
-
-  onTouchEnd(point: Point): boolean {
-
-    if (!this.isSelectionMode()) {
-      return false;
+    draw() {
+        this.painter.draw(this.page);
     }
 
-    if (this.page.isSomethingSelected()) {
-      this.page.setSomethingSelected(false);
-    }
-    else {
-      this.selectRange(this.startPoint, point);
-      this.page.setSomethingSelected();
-    }
+    onTouchStart(point: Point): boolean {
 
-    return true;
-  }
+        if (!this.isSelectionMode()) {
+            return false;
+        }
 
-  selectRange(startPoint: Point, endPoint: Point) {
+        if (this.page.isSomethingSelected()) {
+            this.clearSelection(true);
+            return true;
+        }
 
-    let [startRowIndex, endRowIndex] = this.rowsAffected(startPoint, endPoint);
-    if (startRowIndex < 0 || endRowIndex < 0) return;
+        this.startPoint = point;
 
-    this.clearSelection();
-
-    if (startRowIndex != endRowIndex) {
-      this.selectCrossRows(startRowIndex, endRowIndex, startPoint, endPoint);
-    }
-    else {
-      this.selectOnSingleRow(startPoint, endPoint, startRowIndex);
+        return true;
     }
 
-    this.draw();
-  }
+    onTouchMove(point: Point): boolean {
 
-  private rowsAffected(startPoint, endPoint: Point): number[] {
+        if (!this.isSelectionMode()) {
+            return false;
+        }
 
-    let startRowIndex = -1;
-    let endRowIndex = -1;
+        if (this.page.isSomethingSelected()) {
+            return true;
+        }
 
-    for (let i = 0; i < this.page.rowsCount(); i++) {
+        this.selectRange(this.startPoint, point);
 
-      let row = this.page.rowAt(i);
-
-      if (startRowIndex < 0 && startPoint.y >= row.y && startPoint.y <= row.y + row.height) {
-        startRowIndex = i;
-      }
-
-      if (endRowIndex < 0 && endPoint.y >= row.y && endPoint.y <= row.y + row.height) {
-        endRowIndex = i;
-      }
-
-      if (startRowIndex > -1 && endRowIndex > -1) break;
+        return true;
     }
 
-    return [startRowIndex, endRowIndex];
-  }
+    onTouchEnd(point: Point): boolean {
 
-  private selectCrossRows(startRowIndex: number, endRowIndex: number, startPoint: Point, endPoint: Point) {
+        if (!this.isSelectionMode()) {
+            return false;
+        }
 
-    if (startRowIndex > endRowIndex) {
-      [startRowIndex, endRowIndex] = [endRowIndex, startRowIndex];
-      [startPoint, endPoint] = [endPoint, startPoint];
+        if (this.page.isSomethingSelected()) {
+            this.page.setSomethingSelected(false);
+        }
+        else {
+            this.selectRange(this.startPoint, point);
+            this.page.setSomethingSelected();
+        }
+
+        return true;
     }
 
-    let capGot = false;
-    let startRow = this.page.rowAt(startRowIndex);
+    selectRange(startPoint: Point, endPoint: Point) {
 
-    startRow.map(word => {
-      if (capGot) {
-        word.setSelected();
-      }
-      else if (word.x < startPoint.x && word.x + word.width > startPoint.x) {
-        capGot = true;
-        word.setSelected();
-      }
-    });
+        let [startRowIndex, endRowIndex] = this.rowsAffected(startPoint, endPoint);
+        if (startRowIndex < 0 || endRowIndex < 0) return;
 
-    for (let i = startRowIndex + 1; i < endRowIndex; i++) {
+        this.clearSelection();
 
-      this.page.rowAt(i).map(word => {
-        word.setSelected();
-      });
+        if (startRowIndex != endRowIndex) {
+            this.selectCrossRows(startRowIndex, endRowIndex, startPoint, endPoint);
+        }
+        else {
+            this.selectOnSingleRow(startPoint, endPoint, startRowIndex);
+        }
+
+        this.draw();
     }
 
-    capGot = false;
-    let endRow = this.page.rowAt(endRowIndex);
+    rowsAffected(startPoint, endPoint: Point): number[] {
 
-    for (let i = endRow.length() - 1; i >= 0; i--) {
+        let startRowIndex = -1;
+        let endRowIndex = -1;
 
-      let word = endRow.wordAt(i);
+        for (let i = 0; i < this.page.rowsCount(); i++) {
 
-      if (capGot) {
-        word.setSelected();
-      }
-      else if (word.x < endPoint.x && word.x + word.width > endPoint.x) {
-        capGot = true;
-        word.setSelected();
-      }
+            let row = this.page.rowAt(i);
+
+            if (startRowIndex == -1 && row.rect().contains(startPoint)) {
+                startRowIndex = i;
+            }
+
+            if (endRowIndex == -1 && row.rect().contains(endPoint)) {
+                endRowIndex = i;
+            }
+
+            if (startRowIndex > -1 && endRowIndex > -1) break;
+        }
+
+        return [startRowIndex, endRowIndex];
     }
-  }
 
-  private selectOnSingleRow(startPoint: Point, endPoint: Point, rowIndex: number) {
+    selectCrossRows(startRowIndex: number, endRowIndex: number, startPoint: Point, endPoint: Point) {
 
-    let startX = Math.min(startPoint.x, endPoint.x);
-    let endX = Math.max(startPoint.x, endPoint.x);
+        if (startRowIndex > endRowIndex) {
+            [startRowIndex, endRowIndex] = [endRowIndex, startRowIndex];
+            [startPoint, endPoint] = [endPoint, startPoint];
+        }
 
-    this.page.rowAt(rowIndex).map(word => {
-      if (word.x + word.width > startX && word.x < endX) {
-        word.setSelected();
-      }
-    });
-  }
+        let capGot = false;
+        let startRow = this.page.rowAt(startRowIndex);
 
-  clearSelection(redraw = false) {
+        startRow.map(word => {
+            if (capGot) {
+                word.setSelected();
+            }
+            else if (word.rect().contains(startPoint)) {
+                capGot = true;
+                word.setSelected();
+            }
+        });
 
-    this.page.map(row => {
-      row.map(word => {
-        word.setSelected(false);
-      });
-    });
+        for (let i = startRowIndex + 1; i < endRowIndex; i++) {
 
-    if (redraw) {
-      this.draw();
+            this.page.rowAt(i).map(word => {
+                word.setSelected();
+            });
+        }
+
+        capGot = false;
+        let endRow = this.page.rowAt(endRowIndex);
+
+        for (let i = endRow.length() - 1; i >= 0; i--) {
+
+            let word = endRow.wordAt(i);
+
+            if (capGot) {
+                word.setSelected();
+            }
+            else if (word.rect().contains(endPoint)) {
+                capGot = true;
+                word.setSelected();
+            }
+        }
     }
-  }
+
+    selectOnSingleRow(startPoint: Point, endPoint: Point, rowIndex: number) {
+
+        let startX = Math.min(startPoint.x, endPoint.x);
+        let endX = Math.max(startPoint.x, endPoint.x);
+
+        this.page.rowAt(rowIndex).map(word => {
+            if (startX < word.x + word.width && word.x < endX) {
+                word.setSelected();
+            }
+        });
+    }
+
+    clearSelection(redraw = false) {
+
+        this.page.map(row => {
+            row.map(word => {
+                word.setSelected(false);
+            });
+        });
+
+        if (redraw) {
+            this.draw();
+        }
+    }
 }

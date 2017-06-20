@@ -1,50 +1,47 @@
-import {Row} from "./row";
-/**
- * Created by hezhaoyun on 2017/6/16.
- */
+import { Row } from "./row";
 
 
 export class Page {
 
-  private selectionMode = false;
-  private somethingSelected = false;
+    private selectionMode = false;
+    private somethingSelected = false;
 
-  constructor(private rows: Row[]) {
-  }
-
-  map(action: (row: Row) => void) {
-
-    for (let row of this.rows) {
-      action(row);
+    constructor(private rows: Row[]) {
     }
-  }
 
-  rowsCount() {
-    return this.rows.length;
-  }
+    map(action: (row: Row) => void) {
 
-  rowAt(index: number) {
-    return this.rows[index];
-  }
+        for (let row of this.rows) {
+            action(row);
+        }
+    }
 
-  isSelectionMode() {
-    return this.selectionMode;
-  }
+    rowsCount() {
+        return this.rows.length;
+    }
 
-  enterSelectionMode() {
-    this.selectionMode = true;
-  }
+    rowAt(index: number) {
+        return this.rows[index];
+    }
 
-  leaveSelectionMode() {
-    this.selectionMode = false;
-    this.somethingSelected = false;
-  }
+    isSelectionMode() {
+        return this.selectionMode;
+    }
 
-  isSomethingSelected() {
-    return this.somethingSelected;
-  }
+    enterSelectionMode() {
+        this.selectionMode = true;
+    }
 
-  setSomethingSelected(selected = true) {
-    this.somethingSelected = selected;
-  }
+    leaveSelectionMode() {
+        this.selectionMode = false;
+        this.somethingSelected = false;
+    }
+
+    isSomethingSelected() {
+        return this.somethingSelected;
+    }
+
+    setSomethingSelected(selected = true) {
+        this.somethingSelected = selected;
+    }
 }
