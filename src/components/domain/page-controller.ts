@@ -1,12 +1,14 @@
 import { Painter } from "./painter";
 import { Page } from "../models/page";
 import { Point } from '../models/base-types';
+import { Word } from '../models/word';
+import { AlertController } from 'ionic-angular';
 
 export class PageController {
 
     private startPoint: Point;
 
-    constructor(private page: Page, public painter: Painter) {
+    constructor(private page: Page, public painter: Painter, public alertCtrl: AlertController) {
     }
 
     isSelectionMode() {
@@ -33,50 +35,133 @@ export class PageController {
 
     onTouchStart(point: Point): boolean {
 
-        if (!this.isSelectionMode()) {
-            return false;
-        }
+        if (this.isSelectionMode()) {
 
-        if (this.page.isSomethingSelected()) {
-            this.clearSelection(true);
+            if (this.page.isSomethingSelected()) {
+                this.clearSelection(true);
+                return true;
+            }
+
+            this.startPoint = point;
+
             return true;
         }
+        else {
+            this.page.map(row => {
+                row.map(word => {
+                    if (word.rect().contains(point) && word.isRemarkFlag()) {
+                        this.showRemarks(word);
+                        return true;
+                    }
+                });
+            });
+        }
 
-        this.startPoint = point;
-
-        return true;
+        return false;
     }
 
     onTouchMove(point: Point): boolean {
 
-        if (!this.isSelectionMode()) {
-            return false;
-        }
+        if (this.isSelectionMode()) {
 
-        if (this.page.isSomethingSelected()) {
+            if (this.startPoint == null) {
+                return true;
+            }
+
+            this.selectRange(this.startPoint, point);
+
             return true;
         }
 
-        this.selectRange(this.startPoint, point);
-
-        return true;
+        return false;
     }
 
     onTouchEnd(point: Point): boolean {
 
-        if (!this.isSelectionMode()) {
-            return false;
+        if (this.isSelectionMode()) {
+
+            if (this.startPoint == null) {
+                return true;
+            }
+
+            this.selectRange(this.startPoint, point);
+
+            this.startPoint = null;
+
+            return true;
         }
 
-        if (this.page.isSomethingSelected()) {
-            this.page.setSomethingSelected(false);
+        return false;
+    }
+
+    showRemarks(word: Word) {
+
+        if (word.remarkCount() == 1) {
+
+            let remark = word.remarkAt(0);
+            let [title, content] = this.splitRemark(remark);
+
+            this.showBaseAlert(title, content);
         }
         else {
-            this.selectRange(this.startPoint, point);
-            this.page.setSomethingSelected();
+
+            let alert = this.alertCtrl.create();
+            alert.setTitle('选择批注');
+
+            for (let i = 0; i < word.remarkCount(); i++) {
+
+                let remark = word.remarkAt(i);
+                let [title, content] = this.splitRemark(remark);
+
+                alert.addInput({
+                    type: 'radio',
+                    label: title,
+                    value: remark,
+                    checked: false
+                });
+            }
+
+            alert.addButton('Cancel');
+            alert.addButton({
+                text: 'OK',
+                handler: data => {
+                    let [title, content] = this.splitRemark(data);
+                    this.showBaseAlert(title, content);
+                }
+            });
+
+            alert.present();
+        }
+    }
+
+    showBaseAlert(title: string, content: string) {
+
+        let alert = this.alertCtrl.create({
+            title: title,
+            subTitle: content,
+            buttons: ['OK']
+        });
+
+        alert.present();
+    }
+
+    splitRemark(remark: string): [string, string] {
+
+        let position = remark.indexOf('：');
+
+        let title: string;
+        let content: string;
+
+        if (position > -1) {
+            title = remark.substring(0, position);
+            content = remark.substring(position + 1);
+        }
+        else {
+            title = '批注';
+            content = remark;
         }
 
-        return true;
+        return [title, content];
     }
 
     selectRange(startPoint: Point, endPoint: Point) {
@@ -94,6 +179,8 @@ export class PageController {
         }
 
         this.draw();
+
+        this.page.setSomethingSelected();
     }
 
     rowsAffected(startPoint, endPoint: Point): number[] {
@@ -182,6 +269,8 @@ export class PageController {
                 word.setSelected(false);
             });
         });
+
+        this.page.setSomethingSelected(false);
 
         if (redraw) {
             this.draw();

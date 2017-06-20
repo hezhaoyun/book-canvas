@@ -1,5 +1,5 @@
 import { Component, ViewChild, ElementRef, Renderer2 } from '@angular/core';
-import { Platform } from 'ionic-angular';
+import { Platform, AlertController } from 'ionic-angular';
 import { Painter } from '../domain/painter';
 import { PaintConfig } from '../domain/paint-config';
 import { BookDataProvider } from '../../providers/book-data/book-data';
@@ -19,17 +19,19 @@ export class BookCanvasComponent {
     painter: Painter;
     pageController: PageController;
 
-    constructor(public platform: Platform, public renderer: Renderer2, private bookData: BookDataProvider) {
+    private pixelRatio = 1;
+
+    constructor(public platform: Platform, public renderer: Renderer2, private bookData: BookDataProvider, public alertCtrl: AlertController) {
     }
 
     ngAfterViewInit() {
 
         this.canvas = this.canvasElement.nativeElement;
 
-        let pixelRatio = PaintConfig.pixelRatio(this.canvas);
+        this.pixelRatio = PaintConfig.pixelRatio(this.canvas);
 
-        this.renderer.setAttribute(this.canvas, 'width', this.platform.width() * pixelRatio + '');
-        this.renderer.setAttribute(this.canvas, 'height', this.platform.height() * pixelRatio + '');
+        this.renderer.setAttribute(this.canvas, 'width', this.platform.width() * this.pixelRatio + '');
+        this.renderer.setAttribute(this.canvas, 'height', this.platform.height() * this.pixelRatio + '');
 
         this.painter = new Painter(this.canvas);
 
@@ -39,7 +41,7 @@ export class BookCanvasComponent {
         );
 
         this.page = new Page(rows);
-        this.pageController = new PageController(this.page, this.painter);
+        this.pageController = new PageController(this.page, this.painter, this.alertCtrl);
 
         this.pageController.draw();
     }
@@ -77,6 +79,6 @@ export class BookCanvasComponent {
         let touchX = event.changedTouches[0].clientX;
         let touchY = event.changedTouches[0].clientY;
 
-        return new Point(touchX, touchY);
+        return new Point(touchX * this.pixelRatio, touchY * this.pixelRatio);
     }
 }

@@ -14,7 +14,7 @@ export class Painter {
     clipByMeasure(longText: string, indexStart = 0): Row[] {
 
         let context = this.canvas.getContext('2d');
-        this.paintConfig.applyTextStyle(context);
+        this.paintConfig.style4Text(context);
 
         let lastMeasureWidth = 0;
 
@@ -100,7 +100,7 @@ export class Painter {
     drawSelectionEffect(page: Page) {
 
         let context = this.canvas.getContext('2d');
-        this.paintConfig.applyTextBgStyle(context);
+        this.paintConfig.style4SelectionEffect(context);
 
         page.map(row => {
             let rect = row.selectionRect();
@@ -111,16 +111,16 @@ export class Painter {
     drawText(page: Page) {
 
         let context = this.canvas.getContext('2d');
-        this.paintConfig.applyTextStyle(context, page.isSelectionMode());
+        this.paintConfig.style4Text(context, page.isSelectionMode());
 
         page.map(row => {
 
             row.map(word => {
 
                 if (word.isRemarkFlag()) {
-                    this.paintConfig.applyRemarkFlagStyle(context);
+                    this.paintConfig.style4RemarkFlag(context);
                     context.fillText('👀', word.x, word.rect().y); // 💬👁‍🗨🔔📋👀🗞‍🗨
-                    this.paintConfig.applyTextStyle(context, page.isSelectionMode());
+                    this.paintConfig.style4Text(context, page.isSelectionMode());
                 }
                 else {
                     context.fillText(word.word, word.x, word.rect().y);

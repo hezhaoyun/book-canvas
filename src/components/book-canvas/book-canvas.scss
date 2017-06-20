@@ -4,4 +4,7 @@ book-canvas {
         width: 100%;
         display: block;
     }
+    .alert-wrapper {
+        overflow-y: auto !important;
+    }
 }

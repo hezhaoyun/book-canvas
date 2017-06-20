@@ -45,7 +45,7 @@ export class PaintConfig {
         return devicePixelRatio / backingStoreRatio;
     }
 
-    applyTextStyle(context: any, selectionMode = false) {
+    style4Text(context: any, selectionMode = false) {
 
         if (selectionMode) {
             context.fillStyle = this.selectionModeTextColor;
@@ -58,12 +58,12 @@ export class PaintConfig {
         context.textBaseline = 'top';
     }
 
-    applyRemarkFlagStyle(context: any) {
+    style4RemarkFlag(context: any) {
         context.fillStyle = this.remarkFlagColor;
         context.strokeStyle = this.remarkFlagColor;
     }
 
-    applyTextBgStyle(context: any) {
+    style4SelectionEffect(context: any) {
         context.fillStyle = this.selectedTextBgColor;
     }
 

@@ -45,7 +45,7 @@ export class Row {
         let word = this.words.pop();
         this._line = this._line.substring(0, this._line.length - 1);
 
-        if (this.isEmpty) {
+        if (this.isEmpty()) {
             this._rect.width = 0;
         }
         else {
@@ -71,7 +71,7 @@ export class Row {
 
     selectionRect() {
 
-        let selectionRect = new Rect(0, this.y, 0, this.height);
+        let selectionRect = new Rect(0xFFFF, this.y, 0, this.height);
 
         for (let word of this.words) {
 
