@@ -41,7 +41,7 @@ export class BookCanvasComponent {
         this.pageController = new PageController(this.page, this.painter, this.alertCtrl);
 
         var _this = this; // Wait for 3rd font loading...
-        setTimeout(function() { _this.pageController.draw(); }, 10);
+        setTimeout(function() { _this.pageController.draw(); }, 100);
     }
 
     isSelectionMode() {
