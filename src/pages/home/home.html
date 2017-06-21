@@ -1,21 +1,15 @@
-<ion-content scroll="false">
-    
+<ion-content>
     <ion-slides #slides (ionSlideTap)="ionSlideTap()">
-    
         <ion-slide>
             <book-canvas #canvasComponent></book-canvas>
         </ion-slide>
-    
         <ion-slide #canvasComponent>
             <book-canvas></book-canvas>
         </ion-slide>
-    
         <ion-slide #canvasComponent>
             <book-canvas></book-canvas>
         </ion-slide>
-
     </ion-slides>
-
     <button ion-button (click)="switchSelectionMode()" small id="switch_selection_mode">Selection Mode</button>
     <button ion-button (click)="clearSelection()" small id="clear_selection">Clear Selection</button>
 </ion-content>

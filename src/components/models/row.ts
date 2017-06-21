@@ -48,7 +48,7 @@ export class Row {
     popWord(): Word {
 
         let word = this.words.pop();
-        this._line = this._line.substring(0, this._line.length - 1);
+        this._line = this._line.substring(0, this._line.length - word.word.length);
 
         if (this.isEmpty()) {
             this._rect.width = 0;
