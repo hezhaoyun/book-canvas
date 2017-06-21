@@ -2,6 +2,9 @@ import { PaintConfig } from "./paint-config";
 import { Page } from "../models/page";
 import { Row } from "../models/row";
 import { Word } from "../models/word";
+import { BookDataProvider } from '../../providers/book-data/book-data';
+
+export const REMARK_FLAG = '👀';
 
 export class Painter {
 
@@ -11,7 +14,7 @@ export class Painter {
         this.paintConfig = new PaintConfig(canvas);
     }
 
-    clipByMeasure(longText: string, indexStart = 0): Row[] {
+    clipByMeasure(bookData: BookDataProvider): Row[] {
 
         let context = this.canvas.getContext('2d');
         this.paintConfig.style4Text(context);
@@ -21,51 +24,38 @@ export class Painter {
         let row = new Row(this.paintConfig.y4Row(0), this.paintConfig.lineHeight);
         let rows: Row[] = [];
 
-        for (let i = indexStart; i < longText.length; i++) {
+        while (bookData.hasMore()) {
 
-            let theChar = longText[i];
+            let remarks = bookData.retrieveRemarks();
+            let theChar = (remarks.length > 0) ? REMARK_FLAG : bookData.nextChar();
 
             let measureWidth = context.measureText(row.line() + theChar).width;
             if (measureWidth <= this.paintConfig.contentWidth) {
 
                 let wordWidth = measureWidth - lastMeasureWidth;
 
-                let remarks = this.retrieveRemarks(longText, i);
-
-                if (remarks.length > 0) {
-
-                    let word = new Word('👀', this.paintConfig.x4Word(lastMeasureWidth), wordWidth);
-
-                    let skipWords = 0;
-
-                    for (let remark of remarks) {
-                        word.addRemark(remark);
-                        skipWords += remark.length + 2;
-                    }
-
-                    row.pushWord(word);
-
-                    i += skipWords - 1;
-                }
-                else {
-                    row.pushWord(new Word(theChar, this.paintConfig.x4Word(lastMeasureWidth), wordWidth));
-                }
+                let word = new Word(theChar, this.paintConfig.x4Word(lastMeasureWidth), wordWidth);
+                word.setRemarks(remarks);
+                row.pushWord(word);
 
                 lastMeasureWidth = measureWidth;
                 continue;
             }
 
-            i--; // Current char is ejected because overflow
+            // Current char is ejected because overflow
+            bookData.giveBack(remarks);
 
             let beginningChar = theChar;
-            let endingChar = row.line().charAt(row.length() - 1);
+            let endingChar = row.lastWord().word;
 
-            while (Painter.beginningInappropriate(beginningChar) || Painter.endingInappropriate(endingChar)) {
+            while (BookDataProvider.beginningInappropriate(beginningChar) ||
+                BookDataProvider.endingInappropriate(endingChar)) {
 
-                beginningChar = row.popWord().word;
-                endingChar = row.wordAt(row.length() - 1).word;
+                let popped = row.popWord();
+                bookData.giveBack(popped.remarks);
 
-                i--;
+                beginningChar = popped.word;
+                endingChar = row.lastWord().word;
             }
 
             rows.push(row);
@@ -78,6 +68,7 @@ export class Painter {
             lastMeasureWidth = 0;
         }
 
+        // 最后一行没填满，但bookData没数据了
         if (rows.length < this.paintConfig.maxRows && !row.isEmpty()) {
             rows.push(row);
         }
@@ -88,6 +79,7 @@ export class Painter {
     draw(page: Page) {
 
         let context = this.canvas.getContext('2d');
+
         context.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
         if (page.isSelectionMode()) {
@@ -119,7 +111,7 @@ export class Painter {
 
                 if (word.isRemarkFlag()) {
                     this.paintConfig.style4RemarkFlag(context);
-                    context.fillText('👀', word.x, word.rect().y); // 💬👁‍🗨🔔📋👀🗞‍🗨
+                    context.fillText(word.word, word.x, word.rect().y);
                     this.paintConfig.style4Text(context, page.isSelectionMode());
                 }
                 else {
@@ -127,32 +119,5 @@ export class Painter {
                 }
             });
         });
-    }
-
-    retrieveRemarks(longText: string, startIndex: number): string[] {
-
-        let p = startIndex;
-        let remarks: string[] = [];
-
-        while (longText[p] == '【') {
-
-            let endPosition = longText.indexOf('】', p + 1);
-            if (endPosition < 0) break;
-
-            let remark = longText.substring(p + 1, endPosition);
-
-            remarks.push(remark);
-            p = endPosition + 1;
-        }
-
-        return remarks;
-    }
-
-    static beginningInappropriate(c): boolean {
-        return ":,.?!)]：，。？！…、）】”』".indexOf(c) > -1;
-    }
-
-    static endingInappropriate(c): boolean {
-        return "([（【『“".indexOf(c) > -1;
     }
 }

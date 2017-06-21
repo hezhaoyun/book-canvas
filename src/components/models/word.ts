@@ -7,7 +7,7 @@ export class Word {
 	private selected = false;
 
 	private _rect: Rect;
-	private _remark: string[] = [];
+	private _remarks: string[] = [];
 
 	constructor(public readonly word: string, public readonly x: number, public readonly width: number) {
 		this._rect = new Rect(x, 0, width, 0);
@@ -38,18 +38,29 @@ export class Word {
 	}
 
 	isRemarkFlag(): boolean {
-		return this._remark.length > 0;
+		return this._remarks.length > 0;
+	}
+
+	setRemarks(remarks: string[]) {
+		this._remarks = remarks;
 	}
 
 	remarkCount() {
-		return this._remark.length;
-	}
-
-	addRemark(remark: string) {
-		this._remark.push(remark);
+		return this._remarks.length;
 	}
 
 	remarkAt(index: number) {
-		return this._remark[index];
+		return this._remarks[index];
+	}
+
+	remarkMap(action: (remark: string) => void) {
+
+		for (let remark of this._remarks) {
+			action(remark);
+		}
+	}
+
+	get remarks(): string[] {
+		return this._remarks;
 	}
 }

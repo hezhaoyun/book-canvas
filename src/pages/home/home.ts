@@ -1,23 +1,43 @@
-import {Component, ViewChild} from "@angular/core";
-import {NavController} from "ionic-angular";
-import {BookCanvasComponent} from "../../components/book-canvas/book-canvas";
+import { Component, ViewChild, ViewChildren, QueryList } from "@angular/core";
+import { NavController, Slides } from "ionic-angular";
+import { BookCanvasComponent } from "../../components/book-canvas/book-canvas";
 
 @Component({
-  selector: 'page-home',
-  templateUrl: 'home.html'
+    selector: 'page-home',
+    templateUrl: 'home.html'
 })
 export class HomePage {
 
-  @ViewChild('canvasComponent') canvasComponent: BookCanvasComponent;
+    @ViewChild('slides') slides: Slides;
+    @ViewChildren(BookCanvasComponent) canvasComponents: QueryList<BookCanvasComponent>;
 
-  constructor(public navCtrl: NavController) {
-  }
+    constructor(public navCtrl: NavController) {
+    }
 
-  switchSelectionMode() {
-    this.canvasComponent.switchSelectionMode();
-  }
+    switchSelectionMode() {
+        
+        let activeIndex = this.slides.getActiveIndex();
+        let activeCanvas: BookCanvasComponent = this.canvasComponents.toArray()[activeIndex];
 
-  clearSelection() {
-    this.canvasComponent.clearSelection();
-  }
+        if (activeCanvas.isSelectionMode()) {
+            activeCanvas.setSelectionMode(false);
+            this.slides.lockSwipes(false);
+        }
+        else {
+            activeCanvas.setSelectionMode();
+            this.slides.lockSwipes(true);
+        }
+    }
+
+    clearSelection() {
+
+        let activeIndex = this.slides.getActiveIndex();
+        let activeCanvas: BookCanvasComponent = this.canvasComponents.toArray()[activeIndex];
+
+        activeCanvas.clearSelection();
+    }
+
+    ionSlideTap() {
+        console.log('ionSlideTap');
+    }
 }

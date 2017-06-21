@@ -35,10 +35,7 @@ export class BookCanvasComponent {
 
         this.painter = new Painter(this.canvas);
 
-        let rows = this.painter.clipByMeasure(
-            this.bookData.longText,
-            this.bookData.startIndex
-        );
+        let rows = this.painter.clipByMeasure(this.bookData);
 
         this.page = new Page(rows);
         this.pageController = new PageController(this.page, this.painter, this.alertCtrl);
@@ -46,13 +43,17 @@ export class BookCanvasComponent {
         this.pageController.draw();
     }
 
-    switchSelectionMode() {
+    isSelectionMode() {
+        return this.pageController.isSelectionMode();
+    }
 
-        if (this.pageController.isSelectionMode()) {
-            this.pageController.leaveSelectionMode();
+    setSelectionMode(selectionMode = true) {
+
+        if (selectionMode) {
+            this.pageController.enterSelectionMode();
         }
         else {
-            this.pageController.enterSelectionMode();
+            this.pageController.leaveSelectionMode();
         }
     }
 

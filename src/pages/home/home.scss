@@ -6,10 +6,12 @@ page-home {
     position: absolute;
     left: 20px;
     bottom: 10px;
+    z-index: 100;
   }
   #clear_selection {
     position: absolute;
-    left: 120px;
+    left: 160px;
     bottom: 10px;
+    z-index: 100;
   }
 }

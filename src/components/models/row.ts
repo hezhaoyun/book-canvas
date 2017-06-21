@@ -20,6 +20,11 @@ export class Row {
         return this.words[index];
     }
 
+    lastWord(): Word {
+        let length = this.words.length;
+        return this.words[length - 1];
+    }
+
     map(action: (word: Word) => void) {
 
         for (let word of this.words) {

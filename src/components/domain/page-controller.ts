@@ -48,12 +48,16 @@ export class PageController {
         }
         else {
             this.page.map(row => {
-                row.map(word => {
-                    if (word.rect().contains(point) && word.isRemarkFlag()) {
-                        this.showRemarks(word);
-                        return true;
-                    }
-                });
+
+                if (row.rect().contains(point)) {
+                    
+                    row.map(word => {
+                        if (word.rect().contains(point) && word.isRemarkFlag()) {
+                            this.showRemarks(word);
+                            return true;
+                        }
+                    });
+                }
             });
         }
 
@@ -108,10 +112,9 @@ export class PageController {
             let alert = this.alertCtrl.create();
             alert.setTitle('选择批注');
 
-            for (let i = 0; i < word.remarkCount(); i++) {
+            word.remarkMap(remark => {
 
-                let remark = word.remarkAt(i);
-                let [title, content] = this.splitRemark(remark);
+                let [title,] = this.splitRemark(remark);
 
                 alert.addInput({
                     type: 'radio',
@@ -119,7 +122,7 @@ export class PageController {
                     value: remark,
                     checked: false
                 });
-            }
+            });
 
             alert.addButton('Cancel');
             alert.addButton({
