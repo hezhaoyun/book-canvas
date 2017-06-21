@@ -14,6 +14,8 @@ export class PaintConfig {
     normalTextColor = '#C33';
     selectionModeTextColor = '#333';
 
+    commentImage = new Image();
+
     constructor(private canvas: any, public marginX = 20, public marginY = 30, public fontSize = 18) {
 
         let pixelRatio = PaintConfig.pixelRatio(canvas);
@@ -25,6 +27,8 @@ export class PaintConfig {
         this.contentWidth = canvas.width - this.marginX * 2;
         this.lineHeight = Math.ceil(this.fontSize * 1.5);
         this.maxRows = Math.floor((canvas.height - this.marginY * 2) / this.lineHeight);
+
+        this.commentImage.src="./assets/comment.png";
     }
 
     static pixelRatio(canvas: any) {

@@ -110,9 +110,18 @@ export class Painter {
             row.map(word => {
 
                 if (word.isRemarkFlag()) {
-                    this.paintConfig.style4RemarkFlag(context);
-                    context.fillText(word.word, word.x, word.rect().y);
-                    this.paintConfig.style4Text(context, page.isSelectionMode());
+                    //this.paintConfig.style4RemarkFlag(context);
+                    // context.fillText(word.word, word.x, word.rect().y);
+                    //this.paintConfig.style4Text(context, page.isSelectionMode());
+
+                    let rect = word.rect();
+                    context.drawImage(
+                        this.paintConfig.commentImage,
+                        rect.x,
+                        rect.y,
+                        rect.width,
+                        rect.height
+                    );
                 }
                 else {
                     context.fillText(word.word, word.x, word.rect().y);
