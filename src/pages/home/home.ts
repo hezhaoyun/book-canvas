@@ -1,4 +1,4 @@
-import { Component, ViewChild, ViewChildren, ElementRef, QueryList } from "@angular/core";
+import { Component, ViewChild, ViewChildren, QueryList } from "@angular/core";
 import { NavController, Slides } from "ionic-angular";
 
 import { Page } from "../../components/models/page";
@@ -12,13 +12,12 @@ import { BookDataProvider } from '../../providers/book-data/book-data';
 })
 export class HomePage {
 
+    pages: Page[] = [new Page()]; // 为了文本分布，需要先有一个canvas，使用空白的Page获取这个canvas
+
     @ViewChild('slides') slides: Slides;
     @ViewChildren(BookCanvasComponent) canvasComponents: QueryList<BookCanvasComponent>;
 
-    pages: Page[] = [];
-
     constructor(public navCtrl: NavController, private bookData: BookDataProvider) {
-        this.pages.push(new Page());
     }
 
     ionViewDidEnter() {
@@ -28,7 +27,7 @@ export class HomePage {
 
         let paintConfig = PaintConfig.shared(activeComponent.canvas);
 
-        this.pages = paintConfig.splitByMeasure(
+        this.pages = paintConfig.pagingByMeasure(
             activeComponent.canvas.getContext('2d'),
             this.bookData
         );

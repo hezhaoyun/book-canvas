@@ -3,7 +3,7 @@ import { Word } from "../models/word";
 import { Page } from "../models/page";
 import { BookDataProvider } from '../../providers/book-data/book-data';
 
-export const REMARK_FLAG = '脂批';
+export const REMARK_FLAG = '批注';
 
 export enum ContextFor {
 
@@ -141,7 +141,7 @@ export class PaintConfig {
         return context.measureText(text).width;
     }
 
-    splitByMeasure(context: any, bookData: BookDataProvider): Page[] {
+    pagingByMeasure(context: any, bookData: BookDataProvider): Page[] {
 
         let pages: Page[] = [];
 
