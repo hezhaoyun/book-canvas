@@ -22,7 +22,6 @@ export class PaintConfig {
 
     static instance: PaintConfig = null;
 
-    private context: any;
     private prevContextFor: ContextFor;
 
     /**
@@ -53,8 +52,7 @@ export class PaintConfig {
         selectedTextColor: '#333',
 
         remarkFlagTextColor: '#FFF',
-        remarkFlagBgColor: '#F00',
-        remarkFlagUnderlineColor: '#F00',
+        remarkFlagBgColor: '#FAA',
     };
 
     maxRows = 0;
@@ -62,6 +60,9 @@ export class PaintConfig {
     static shared(canvas: any = null): PaintConfig {
 
         if (PaintConfig.instance == null) {
+            
+            if (canvas == null) return null;
+
             PaintConfig.instance = new PaintConfig(canvas);
         }
 
@@ -69,10 +70,7 @@ export class PaintConfig {
     }
 
     private constructor(canvas: any) {
-
-        this.context = canvas.getContext('2d');
         let pixelRatio = PaintConfig.pixelRatio(canvas);
-
         this.config(canvas, pixelRatio);
     }
 
@@ -80,6 +78,7 @@ export class PaintConfig {
 
         this.Font.fontSize *= pixelRatio;
         this.Font.lineHeight *= pixelRatio;
+        this.Font.textFont = `${this.Font.fontSize}px san-serif`;
 
         this.PageRect.width = canvas.width;
         this.PageRect.height = canvas.height;
@@ -93,37 +92,37 @@ export class PaintConfig {
         this.PageRect.contentHeight = this.maxRows * this.Font.lineHeight;
     }
 
-    prepareContext(contextFor: ContextFor): any {
+    prepareContext(context: any, contextFor: ContextFor) {
 
         if (contextFor != this.prevContextFor) {
 
             switch (contextFor) {
 
                 case ContextFor.DRAW_TEXT:
-                    this.context.font = this.Font.textFont;
-                    this.context.textBaseline = 'top';
-                    this.context.fillStyle = this.Colors.normalTextColor;
+                    context.font = this.Font.textFont;
+                    context.textBaseline = 'top';
+                    context.fillStyle = this.Colors.normalTextColor;
                     break;
 
                 case ContextFor.DRAW_SELECTION_TEXT:
-                    this.context.font = this.Font.textFont;
-                    this.context.textBaseline = 'top';
-                    this.context.fillStyle = this.Colors.selectedTextColor;
+                    context.font = this.Font.textFont;
+                    context.textBaseline = 'top';
+                    context.fillStyle = this.Colors.selectedTextColor;
                     break;
 
                 case ContextFor.DRAW_SELECTION_BG:
-                    this.context.fillStyle = this.Colors.selectedTextBgColor;
+                    context.fillStyle = this.Colors.selectedTextBgColor;
                     break;
 
                 case ContextFor.DRAW_REMARK_FLAG_TEXT:
                     // this.context.font = this.Font.remarkFlagFont;
-                    this.context.font = this.Font.textFont;
-                    this.context.textBaseline = 'top';
-                    this.context.fillStyle = this.Colors.remarkFlagTextColor;
+                    context.font = this.Font.textFont;
+                    context.textBaseline = 'top';
+                    context.fillStyle = this.Colors.remarkFlagTextColor;
                     break;
 
                 case ContextFor.DRAW_REMARK_FLAG_BG:
-                    this.context.fillStyle = this.Colors.remarkFlagBgColor;
+                    context.fillStyle = this.Colors.remarkFlagBgColor;
                     break;
 
                 case ContextFor.REUSE:
@@ -135,27 +134,26 @@ export class PaintConfig {
 
             this.prevContextFor = contextFor;
         }
-
-        return this.context;
     }
 
-    measureWidth(text: string, contextFor: ContextFor): number {
-        return this.prepareContext(contextFor).measureText(text).width;
+    measureWidth(context: any, text: string, contextFor: ContextFor): number {
+        this.prepareContext(context, contextFor);
+        return context.measureText(text).width;
     }
 
-    splitByMeasure(bookData: BookDataProvider): Page[] {
+    splitByMeasure(context: any, bookData: BookDataProvider): Page[] {
 
         let pages: Page[] = [];
 
         while (bookData.hasMore()) {
-            let page = this.generatePage(bookData);
+            let page = this.generatePage(context, bookData);
             pages.push(page);
         }
 
         return pages;
     }
 
-    generatePage(bookData: BookDataProvider): Page {
+    generatePage(context: any, bookData: BookDataProvider): Page {
 
         let page = new Page();
         let row = new Row(this.y4Row(0), this.Font.lineHeight);
@@ -167,7 +165,7 @@ export class PaintConfig {
             let remarks = bookData.retrieveRemarks();
             let theChar = (remarks.length > 0) ? REMARK_FLAG : bookData.nextChar();
 
-            let measureWidth = this.measureWidth(row.line() + theChar, ContextFor.DRAW_TEXT);
+            let measureWidth = this.measureWidth(context, row.line() + theChar, ContextFor.DRAW_TEXT);
 
             if (measureWidth <= this.PageRect.contentWidth) {
 

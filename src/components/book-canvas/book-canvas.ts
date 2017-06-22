@@ -40,6 +40,8 @@ export class BookCanvasComponent {
 
         this.painter = new Painter(this.canvas);
         this.pageController = new PageController(this.page, this.painter, this.alertCtrl);
+
+        this.painter.draw(this.page);
     }
 
     isSelectionMode() {

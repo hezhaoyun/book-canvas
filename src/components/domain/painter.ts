@@ -1,30 +1,35 @@
 import { PaintConfig, ContextFor } from "./paint-config";
 import { Page } from "../models/page";
-import { Row } from "../models/row";
-import { Word } from "../models/word";
-import { BookDataProvider } from '../../providers/book-data/book-data';
-
-export const REMARK_FLAG = '\ue643';
 
 export class Painter {
 
+    private context: any;
+
     constructor(private canvas: any) {
+        this.context = canvas.getContext('2d');
     }
 
     draw(page: Page) {
 
-        let pageRect = PaintConfig.shared().PageRect;
+        let paintConfig = PaintConfig.shared();
+        if (paintConfig == null) return;
 
-        let context = PaintConfig.shared().prepareContext(ContextFor.REUSE);
-        context.clearRect(0, 0, pageRect.width, pageRect.height);
+        paintConfig.prepareContext(this.context, ContextFor.REUSE);
+        
+        this.context.clearRect(
+            0,
+            0,
+            PaintConfig.shared().PageRect.width,
+            PaintConfig.shared().PageRect.height
+        );
 
         if (page.isSelectionMode()) {
 
-            let context = PaintConfig.shared().prepareContext(ContextFor.DRAW_SELECTION_BG);
+            PaintConfig.shared().prepareContext(this.context, ContextFor.DRAW_SELECTION_BG);
 
             page.map(row => {
                 let rect = row.selectionRect();
-                context.fillRect(rect.x, rect.y, rect.width, rect.height);
+                this.context.fillRect(rect.x, rect.y, rect.width, rect.height);
             });
         }
 
@@ -36,19 +41,20 @@ export class Painter {
 
                 if (word.isRemarkFlag()) {
 
-                    let context = PaintConfig.shared().prepareContext(ContextFor.DRAW_REMARK_FLAG_BG);
-                    context.fillRect(rect.x, rect.y, rect.width, rect.height);
+                    PaintConfig.shared().prepareContext(this.context, ContextFor.DRAW_REMARK_FLAG_BG);
+                    this.context.fillRect(rect.x, rect.y, rect.width, rect.height);
 
-                    context = PaintConfig.shared().prepareContext(ContextFor.DRAW_REMARK_FLAG_TEXT);
-                    context.fillText(word.word, rect.x, rect.y);
+                    PaintConfig.shared().prepareContext(this.context, ContextFor.DRAW_REMARK_FLAG_TEXT);
+                    this.context.fillText(word.word, rect.x, rect.y);
                 }
                 else {
 
-                    let context = PaintConfig.shared().prepareContext(
+                    PaintConfig.shared().prepareContext(
+                        this.context,
                         page.isSelectionMode() ? ContextFor.DRAW_SELECTION_TEXT : ContextFor.DRAW_TEXT
                     );
 
-                    context.fillText(word.word, rect.x, rect.y);
+                    this.context.fillText(word.word, rect.x, rect.y);
                 }
             });
         });

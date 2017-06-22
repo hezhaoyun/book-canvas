@@ -13,7 +13,6 @@ import { BookDataProvider } from '../../providers/book-data/book-data';
 export class HomePage {
 
     @ViewChild('slides') slides: Slides;
-    @ViewChild('bookCanvas') firstCanvasElement: ElementRef;
     @ViewChildren(BookCanvasComponent) canvasComponents: QueryList<BookCanvasComponent>;
 
     pages: Page[] = [];
@@ -22,12 +21,18 @@ export class HomePage {
         this.pages.push(new Page());
     }
 
-    ngAfterViewDidLoad() {
+    ionViewDidEnter() {
 
-        let canvas = this.firstCanvasElement.nativeElement;
-        let paintConfig = PaintConfig.shared(canvas);
+        let activeIndex = this.slides.getActiveIndex();
+        let activeComponent: BookCanvasComponent = this.canvasComponents.toArray()[activeIndex];
 
-        this.pages = paintConfig.splitByMeasure(this.bookData);
+        let paintConfig = PaintConfig.shared(activeComponent.canvas);
+
+        this.pages = paintConfig.splitByMeasure(
+            activeComponent.canvas.getContext('2d'),
+            this.bookData
+        );
+        
         this.slides.update();
     }
 
