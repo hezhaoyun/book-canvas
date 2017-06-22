@@ -1,6 +1,10 @@
-import { Component, ViewChild, ViewChildren, QueryList } from "@angular/core";
+import { Component, ViewChild, ViewChildren, ElementRef, QueryList } from "@angular/core";
 import { NavController, Slides } from "ionic-angular";
+
+import { Page } from "../../components/models/page";
+import { PaintConfig } from "../../components/domain/paint-config";
 import { BookCanvasComponent } from "../../components/book-canvas/book-canvas";
+import { BookDataProvider } from '../../providers/book-data/book-data';
 
 @Component({
     selector: 'page-home',
@@ -9,9 +13,22 @@ import { BookCanvasComponent } from "../../components/book-canvas/book-canvas";
 export class HomePage {
 
     @ViewChild('slides') slides: Slides;
+    @ViewChild('bookCanvas') firstCanvasElement: ElementRef;
     @ViewChildren(BookCanvasComponent) canvasComponents: QueryList<BookCanvasComponent>;
 
-    constructor(public navCtrl: NavController) {
+    pages: Page[] = [];
+
+    constructor(public navCtrl: NavController, private bookData: BookDataProvider) {
+        this.pages.push(new Page());
+    }
+
+    ngAfterViewDidLoad() {
+
+        let canvas = this.firstCanvasElement.nativeElement;
+        let paintConfig = PaintConfig.shared(canvas);
+
+        this.pages = paintConfig.splitByMeasure(this.bookData);
+        this.slides.update();
     }
 
     switchSelectionMode() {

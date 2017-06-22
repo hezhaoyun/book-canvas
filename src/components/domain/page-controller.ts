@@ -8,7 +8,11 @@ export class PageController {
 
     private startPoint: Point;
 
-    constructor(private page: Page, public painter: Painter, public alertCtrl: AlertController) {
+    constructor(
+        private page: Page,
+        public painter: Painter,
+        public alertCtrl: AlertController) {
+        
     }
 
     isSelectionMode() {

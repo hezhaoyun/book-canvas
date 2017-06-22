@@ -1,7 +1,7 @@
 <ion-content>
     <ion-slides #slides (ionSlideTap)="ionSlideTap()">
-        <ion-slide *ngFor="let i of [1,2,3,4,5,6,7,8]">
-            <book-canvas></book-canvas>
+        <ion-slide *ngFor="let page of pages">
+            <book-canvas [page]="page"></book-canvas>
         </ion-slide>
     </ion-slides>
     <button ion-button (click)="switchSelectionMode()" small clear id="switch_selection_mode">Selection Mode</button>

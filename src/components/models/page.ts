@@ -1,12 +1,12 @@
 import { Row } from "./row";
 
-
 export class Page {
 
+    private rows: Row[] = [];
     private selectionMode = false;
     private somethingSelected = false;
 
-    constructor(private rows: Row[]) {
+    constructor() {
     }
 
     map(action: (row: Row) => void) {
@@ -18,6 +18,10 @@ export class Page {
 
     rowsCount() {
         return this.rows.length;
+    }
+
+    pushRow(row: Row) {
+        this.rows.push(row);
     }
 
     rowAt(index: number) {
