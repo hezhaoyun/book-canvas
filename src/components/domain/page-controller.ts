@@ -7,12 +7,13 @@ import { AlertController } from 'ionic-angular';
 export class PageController {
 
     private startPoint: Point;
+    private touchDownWord: Word;
 
     constructor(
         private page: Page,
         public painter: Painter,
         public alertCtrl: AlertController) {
-        
+
     }
 
     isSelectionMode() {
@@ -54,10 +55,10 @@ export class PageController {
             this.page.map(row => {
 
                 if (row.rect().contains(point)) {
-                    
+
                     row.map(word => {
                         if (word.rect().contains(point) && word.isRemarkFlag()) {
-                            this.showRemarks(word);
+                            this.touchDownWord = word;
                             return true;
                         }
                     });
@@ -97,6 +98,25 @@ export class PageController {
             this.startPoint = null;
 
             return true;
+        }
+        else if (this.touchDownWord) {
+            
+            this.page.map(row => {
+
+                if (row.rect().contains(point)) {
+
+                    row.map(word => {
+                        if (word.rect().contains(point) && word.isRemarkFlag()) {
+                            if (this.touchDownWord == word) {
+                                this.showRemarks(word);
+                            }
+                            this.touchDownWord = null;
+                            return true;
+                        }
+                    });
+                }
+            });
+
         }
 
         return false;
